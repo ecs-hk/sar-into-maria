@@ -1,0 +1,25 @@
+<%- include('z01header') %>
+
+<div class="jumbotron">
+    <h1><%= title %></h1>
+
+<% if(typeof results !== 'undefined' && results.length > 0) { %>
+
+  <div class="row">
+
+  <% results.forEach(function(item) { %>
+    <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2 col-xl-1">
+      <a class="btn btn-default btn-sm" href="./graphs?hoursSelection=1&hostSelection=<%= item.Hostname %>">
+        <%= item.Hostname %>
+      </a>
+    </div>
+  <% }) %>
+
+  </div>
+
+<% } %>
+
+</div>
+
+<%- include('z02footer') %>
+

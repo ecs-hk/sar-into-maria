@@ -1,0 +1,22 @@
+{
+  "name": "sar-into-maria",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "bower": "^1.7.9",
+    "ejs": "^2.5.1",
+    "express": "^4.14.0",
+    "helmet": "^2.1.2",
+    "mariasql": "^0.2.6",
+    "moment": "^2.14.1",
+    "morgan": "^1.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

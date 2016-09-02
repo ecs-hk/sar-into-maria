@@ -1,0 +1,13 @@
+<%- include('z01header') %>
+
+<div class="jumbotron">
+
+    <h1><%= title %></h1>
+
+    <% if(typeof error !== 'undefined' && error) { %>
+        <p><%= error %></p>
+    <% } %>
+
+</div> <!-- class jumbotron -->
+
+<%- include('z02footer') %>

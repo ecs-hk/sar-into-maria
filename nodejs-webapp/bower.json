@@ -1,0 +1,20 @@
+{
+  "name": "sar-into-maria",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "chartist": "^0.9.8",
+    "bootstrap-theme-bootswatch-flatly": "^1.0.2",
+    "underscore": "^1.8.3"
+  }
+}
