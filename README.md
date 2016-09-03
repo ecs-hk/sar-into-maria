@@ -25,6 +25,8 @@ cp setup-service-accounts.sql ~
 ```
 
 * Edit `~/setup-service-accounts.sql` to use strong passwords.
+
+* Run the edited SQL:
 ```shell
 cd sar-into-maria/sql
 mysql -u root -h db01.org.local -p < ~/setup-db.sql 
@@ -50,7 +52,7 @@ sudo chmod 0600 /usr/local/etc/sar-into-maria.json
 sudo chmod 0644 /etc/cron.d/sar-collector-cronjob
 ```
 
-* Edit `db-connection.json` to use your MariaDB connection and an account with SELECT,INSERT,UPDATE,DELETE privileges.
+* Edit `/usr/local/etc/sar-into-maria.json` to use your MariaDB connection and an account with SELECT,INSERT,UPDATE,DELETE privileges.
 
 ---
 
@@ -58,9 +60,9 @@ sudo chmod 0644 /etc/cron.d/sar-collector-cronjob
 
 * Download and install [Node.js](https://nodejs.org) LTS
 
-* Set up your environment, e.g.:
+* Set up your environment:
 ```shell
-_d=/path/to/node-v4.x.y
+_d=/path/to/node-v4.5.*
 export NODE_PATH=${_d}/lib/node_modules
 export PATH=/usr/bin:/bin:${_d}/bin
 ```
@@ -75,8 +77,8 @@ npm install
 * Set up HTTP server and MariaDB connection:
 ```shell
 cd sar-into-maria/nodejs-webapp/site-config
-cp http-server.json.EXAMPLE http-server.json
 cp db-connection.json.EXAMPLE db-connection.json
+cp http-server.json.EXAMPLE http-server.json
 ```
 
 * Edit `db-connection.json` to use your MariaDB connection and an account with SELECT privileges.
@@ -87,9 +89,9 @@ cp db-connection.json.EXAMPLE db-connection.json
 
 ## Run the web app
 
-* Set up your environment (if you haven't already), a la:
+* Set up your environment (if you haven't already):
 ```shell
-_d=/path/to/node-v4.x.y
+_d=/path/to/node-v4.5.*
 export NODE_PATH=${_d}/lib/node_modules
 export PATH=/usr/bin:/bin:${_d}/bin
 ```
