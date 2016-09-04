@@ -7,13 +7,23 @@
 
 <ul class="nav nav-pills">
   <li><a href="./"><span class="glyphicon glyphicon-home"></span></a></li>
-  <li><a href="./graphs?hoursSelection=1&hostSelection=<%= hostname %>">1 hour</a></li>
-  <li><a href="./graphs?hoursSelection=4&hostSelection=<%= hostname %>">4 hours</a></li>
-  <li><a href="./graphs?hoursSelection=24&hostSelection=<%= hostname %>">1 day</a></li>
-  <li><a href="./graphs?hoursSelection=168&hostSelection=<%= hostname %>">1 week</a></li>
+  <li id="pill1h"><a href="./graphs?hoursSelection=1&hostSelection=<%= hostname %>">1 hour</a></li>
+  <li id="pill4h"><a href="./graphs?hoursSelection=4&hostSelection=<%= hostname %>">4 hours</a></li>
+  <li id="pill24h"><a href="./graphs?hoursSelection=24&hostSelection=<%= hostname %>">1 day</a></li>
+  <li id="pill168h"><a href="./graphs?hoursSelection=168&hostSelection=<%= hostname %>">1 week</a></li>
 </ul>
 
 </div></div>
+
+<script>
+$(document).ready(function() {
+  var tw = <%= timeWindow %>,
+      pillId = '#pill' + tw + 'h';
+  if(tw === 1 || tw === 4 || tw === 24 || tw === 168) {
+    $(pillId).addClass('active');
+  }
+});
+</script>
 
 <% if(typeof errMsg !== 'undefined' && errMsg) { %>
 <div class="alert alert-dismissable alert-warning">

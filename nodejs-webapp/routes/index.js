@@ -60,10 +60,10 @@ function queryHostsAndRespond(req, res, sqlQuery) {
   });
 }
 
-function querySarDataAndRespond(req, res, sqlQuery) {
+function querySarDataAndRespond(req, res, sqlQuery, hours) {
   var connInfo = req.app.locals.mariaConnInfo,
       c = new maria(connInfo),
-      ejsObj = {};
+      ejsObj = {'timeWindow': hours};
 
   c.query(sqlQuery, function(err, rows) {
     if(err) {
@@ -113,6 +113,6 @@ exports.getGraphs = function(req, res) {
             'WHERE Hostname = "' + host + '" ' +
             'AND LoggedTime > "' + past + '" ' +
             'ORDER BY LoggedTime ASC';
-    querySarDataAndRespond(req, res, q);
+    querySarDataAndRespond(req, res, q, hours);
   }
 }
