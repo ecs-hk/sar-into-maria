@@ -9,7 +9,7 @@ sar(1) data collector cronjob and a frontend web (graphing) app. Data collector 
 
 ## Screenshots
 
-![Screenshot](/README.md-img/graphs.png?raw=true)
+![Screenshot](/README.md-img/index.png?raw=true)
 
 ![Screenshot](/README.md-img/graphs-w-details.png?raw=true)
 
