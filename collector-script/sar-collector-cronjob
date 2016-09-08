@@ -1,1 +1,1 @@
-*/15 * * * * root /usr/local/sbin/sar-into-maria.bash
+03,13,23,33,43,53 * * * * root /usr/local/sbin/sar-into-maria.bash

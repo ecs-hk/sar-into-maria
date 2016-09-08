@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Managed by CFEngine
-
-# Intended to be run as a cronjob - every ten to thirty minutes. Each time it
-# runs it will process sar data starting from "one hour ago".
+# Intended to be run as a cronjob shortly after each sar(1) data collection
+# period. On most default installs, sar(1) data collection runs at:
+#   00, 10, 20, 30, 40, 50
 #
-# To preserve (rather than clean up) the output files to diagnose problems,
-# call the script with the "debug" parameter.
+# so we'd like to run this script at:
+#   03, 13, 23, 33, 43, 53
+#
+# YMMV. Adapt the run times as needed.
 
 # -------------------------------------------------------------------------------- #
 #                       VARIABLE DEFINITIONS
@@ -14,16 +15,13 @@
 
 PATH=/bin:/usr/bin
 
-if [ "${1}" == "debug" ] ; then
-        readonly _debug='on'
-fi
-
 readonly _uqhost="${HOSTNAME%%.*}"
 
-readonly _sar_output="$(mktemp)"
-readonly _matches="$(mktemp)"
-readonly _errors="$(mktemp)"
-readonly _sql="$(mktemp)"
+readonly _dout="$(mktemp -d)"
+readonly _sar_output="${_dout}/sarout"
+readonly _matches="${_dout}/regmatches"
+readonly _errors="${_dout}/errors"
+readonly _sql="${_dout}/sql"
 
 readonly _maria_conn='/usr/local/etc/sar-into-maria.json'
 
@@ -32,21 +30,16 @@ readonly _maria_conn='/usr/local/etc/sar-into-maria.json'
 # -------------------------------------------------------------------------------- #
 
 errout() {
-        local _this="${0##*/}"
-        local _msg="${_this}: ${1} (Try: '${_this} debug')"
+        local _msg="${0##*/}: ${1} (See: ${_dout})"
 
         logger -p local3.err "${_msg}"
         printf '%s\n' "${_msg}" >> "${_errors}"
-
-        if [ -z "${_debug}" ] ; then
-                cleanup
-        fi
 
 	exit 1
 }
 
 cleanup() {
-        rm -f "${_sar_output}" "${_matches}" "${_errors}" "${_sql}"
+        rm -fr "${_dout}"
 }
 
 sleep_a_bit() {
@@ -103,12 +96,14 @@ set_sadf_options() {
 }
 
 set_sar_options() {
-        local _o
+        local _o1
+        local _o2
 
-        # Set the start time to one hour ago (%T is HH:MM:SS).
-        _o="-s $(date --date='-1 hour' +%T)"
+        # Set the sar (1) data report start time (%T is HH:MM:SS).
+        _o1="-s $(date --date='-30 minutes' +%T)"
+        _o2="-e $(date +%T)"
 
-        readonly _sar_opt="${_o}"
+        readonly _sar_opt="${_o1} ${_o2}"
 }
 
 audit_int() {
@@ -146,7 +141,6 @@ generate_sql_upserts() {
         local _percent
         local _val
         local _cpu_num
-        local _rc
 
         build_sar_data_matches_file "${_regex}"
 
@@ -241,12 +235,12 @@ build_disk_sql() {
 }
 
 gather_sar_output() {
-        local _rc=0
+        cp /dev/null "${_sar_output}"
 
         (       sadf -p ${_sadf_opt} -- ${_sar_opt} -r -S &&                    \
                 sadf -p ${_sadf_opt} -- ${_sar_opt} -P ALL &&                   \
                 sadf -p ${_sadf_opt} -- ${_sar_opt} -p -d                       \
-        )       > "${_sar_output}" 2>> "${_errors}"
+        )       >> "${_sar_output}" 2>> "${_errors}"
 
         if [ ${?} -ne 0 ] ; then
                 errout "Problem querying sar for reports"
@@ -304,17 +298,8 @@ generate_sql_upserts "\s%+util\s" "IOUtilPct"
 generate_sql_upserts "\sawait\s" "IOWaitMsecsAvg"
 generate_sql_upserts "\savgqu-sz\s" "QueueLengthAvg"
 
-if [ -z "${_debug}" ] ; then
-        sleep_a_bit
-        write_to_database
-        cleanup
-else
-        printf '%s\n%s\n%s\n%s\n%s\n'                                           \
-        'Debug mode is on. No DB updates. See:'                                 \
-        "sar output: ${_sar_output}"                                            \
-        "Last regex match: ${_matches}"                                         \
-        "Errors: ${_errors}"                                                    \
-        "Generated SQL upserts: ${_sql}"
-fi
+sleep_a_bit
+write_to_database
+cleanup
 
 exit 0
