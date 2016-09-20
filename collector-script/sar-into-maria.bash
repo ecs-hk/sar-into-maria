@@ -25,6 +25,8 @@ readonly _sql="${_dout}/sql"
 
 readonly _maria_conn='/usr/local/etc/sar-into-maria.json'
 
+_just_after_midnight=0
+
 # -------------------------------------------------------------------------------- #
 #                       FUNCTIONS
 # -------------------------------------------------------------------------------- #
@@ -96,14 +98,22 @@ set_sadf_options() {
 }
 
 set_sar_options() {
-        local _o1
-        local _o2
+        local _t1
+        local _t2
 
-        # Set the sar (1) data report start time (%T is HH:MM:SS).
-        _o1="-s $(date --date='-30 minutes' +%T)"
-        _o2="-e $(date +%T)"
+        # Set the sar(1) data report start and end times (%T is HH:MM:SS).
+        _t1="$(date --date='-30 minutes' +%T)"
+        _t2="$(date +%T)"
 
-        readonly _sar_opt="${_o1} ${_o2}"
+        # However, if the starting hour is 23 and the ending hour is 00, it
+        # means we jumped back into the previous day, which confuses sar(1)
+        # queries. In that case, just set start time to midnight exactly.
+        if [ "${_t1: 0: 2}" == '23' ] && [ "${_t2: 0: 2}" == '00' ] ; then
+                _t1='-s 00:00:00'
+                _just_after_midnight=1
+        fi
+
+        readonly _sar_opt="-s ${_t1} -e ${_t2}"
 }
 
 audit_int() {
@@ -247,18 +257,6 @@ gather_sar_output() {
         fi
 }
 
-check_for_empty_sar_data_if_it_is_just_after_midnight() {
-        local _hour="$(date +%H)"
-
-        # If the file is empty, and we're in the midnight hour, it means
-        # we don't have any sar data to process yet. Get out quietly.
-        if [ "${_hour}" == "00" ] && [ ! -s "${_sar_output}" ] ; then
-                return 1
-        fi
-
-        return 0
-}
-
 write_to_database() {
         mysql                                                                   \
         --host="${_my_host}"                                                    \
@@ -282,11 +280,12 @@ audit_cli
 suck_in_database_connection_info
 set_sadf_options
 set_sar_options
-
 gather_sar_output
-check_for_empty_sar_data_if_it_is_just_after_midnight
 
-if [ ${?} -eq 1 ] ; then
+# If we're just after the midnight hour, it's possible sar(1) doesn't
+# have any report data yet. In that case, get out quietly.
+if [ ${_just_after_midnight} -eq 1 ] && [ ! -s "${_sar_output}" ] ; then
+        cleanup
         exit 0
 fi
 
@@ -300,6 +299,6 @@ generate_sql_upserts "\savgqu-sz\s" "QueueLengthAvg"
 
 sleep_a_bit
 write_to_database
-cleanup
 
+cleanup
 exit 0
