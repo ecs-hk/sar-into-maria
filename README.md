@@ -5,7 +5,7 @@
 sar(1) data collector cronjob and a frontend web (graphing) app. Data collector is a bash script that uses jq(1) and several common CLI utilities. Web app is built with Node.js, Chartist.js, and other excellent tools from the Javascript ecosystem.
 
 * Data collector script tested on EL 6, EL 7, and Debian 8.
-* Web app tested on EL 7 using Node.js v4.5.* LTS.
+* Web app tested on EL 7 using Node.js v6.9.* LTS.
 
 ## Screenshots
 
