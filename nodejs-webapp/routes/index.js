@@ -4,7 +4,9 @@ var assert = require('assert'),
     debug = false;
 
 function validHostname(suspect) {
-  var re = /^([a-z]|\.){2,}$/;
+  // Valid URI hostnames can only contain letters, numbers, and hyphens,
+  // and they cannot begin or end with a hyphen.
+  var re = /^[a-z0-9]+([a-z0-9]|\.|\-)*[a-z0-9]+$/i;
   if(!suspect) {
     return false;
   }
